@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <locale.h>
-
+#include <string.h>
 typedef struct
 {
     char nome[50];
@@ -12,14 +12,17 @@ typedef struct
 
 void menu(FILE *dados, MATERIAS *materia, int *tamanho);
 void cadastrarMaterias(FILE *dados, MATERIAS *materia, int *tamanho);
-void alterarMaterias(FILE *dados);
-void listarMaterias(FILE *dados);
+void alterarMaterias(FILE *dados, MATERIAS *materia, int *tamanho);
+void listarMaterias(MATERIAS *materia);
 void excluirMaterias(FILE *dados);
 void adicionarNota(FILE *dados);
 void alterarNota(FILE *dados);
 void calcularRendimentoGlobal(FILE *dados);
 void calcularRendimentoSemestre(FILE *dados);
 int lerMaterias(FILE *dados, MATERIAS *materia);
+void menuAlterarMaterias(FILE *dados, MATERIAS *materia, int *tamanho);
+void pause();
+void clear();
 
 int main(void)
 {
@@ -57,6 +60,8 @@ void menu(FILE *dados, MATERIAS *materia, int *tamanho)
 
     do
     {
+        clear();
+
         printf("1 - Cadastrar materias\n");
         printf("2 - Alterar materias\n");
         printf("3 - Listar materias\n");
@@ -75,10 +80,10 @@ void menu(FILE *dados, MATERIAS *materia, int *tamanho)
             cadastrarMaterias(dados, materia, tamanho);
             break;
         case 2:
-            alterarMaterias(dados);
+            menuAlterarMaterias(dados, materia, tamanho);
             break;
         case 3:
-            listarMaterias(dados);
+            listarMaterias(materia);
             break;
         case 4:
             excluirMaterias(dados);
@@ -104,15 +109,22 @@ void menu(FILE *dados, MATERIAS *materia, int *tamanho)
         }
 
     } while (opcao != 9);
+
+    clear();
 }
 
 int lerMaterias(FILE *dados, MATERIAS *materia)
 {
     int i = 0;
+    char linha[100];
 
-    while (fscanf(dados, "%s %.2f %d %d", materia[i].nome, &materia[i].nota, &materia[i].peso, &materia[i].semestre) != EOF)
+    while (fgets(linha, sizeof(linha), dados) != NULL)
     {
-        i++;   
+        sscanf(linha, " %49[^0-9] %f %d %d", materia[i].nome, &materia[i].nota, &materia[i].peso, &materia[i].semestre);
+
+        materia[i].nome[strcspn(materia[i].nome, "\n")] = '\0';
+
+        i++;
     }
 
     return i;
@@ -121,6 +133,9 @@ int lerMaterias(FILE *dados, MATERIAS *materia)
 void cadastrarMaterias(FILE *dados, MATERIAS *materia, int *tamanho)
 {
     int tam = *tamanho;
+
+    clear();
+
     // Adicionar materia
     printf("Digite o nome da materia: ");
     scanf("%s", materia[tam].nome);
@@ -137,10 +152,104 @@ void cadastrarMaterias(FILE *dados, MATERIAS *materia, int *tamanho)
     *tamanho = tam;
 }
 
-void alterarMaterias(FILE *dados) {}
-void listarMaterias(FILE *dados) {}
+void menuAlterarMaterias(FILE *dados, MATERIAS *materia, int *tamanho) {
+    int opcao;
+
+    do {
+        clear();
+
+        printf("1- Listar materias\n");
+        printf("2- Alterar materias\n");
+        printf("3 - Sair\n");
+        scanf("%d", &opcao);
+
+        switch (opcao) {
+            case 1:
+                listarMaterias(materia);
+                break;
+            case 2:
+                alterarMaterias(dados, materia, tamanho);
+                break;
+            case 3:
+                break;
+            default:
+                printf("Opcao invalida\n");
+                break;
+        }
+    } while (opcao != 3);
+}
+
+void alterarMaterias(FILE *dados, MATERIAS *materia, int *tamanho) {
+    MATERIAS temp;
+    int i = 0, indicador = 0;
+    char nome[50];
+
+    clear();
+
+    printf("Digite o nome da materia que deseja alterar: ");
+    scanf("%s", nome);
+
+    while (fscanf(dados, "%s %.2f %d %d", materia[i].nome, &materia[i].nota, &materia[i].peso, &materia[i].semestre) != EOF) {
+        if (strcmp(nome, materia[i].nome) == 0) {
+            
+            indicador = 1;
+
+            printf("Digite o novo nome da materia: ");
+            scanf(" %s", temp.nome);
+            printf("Digite a nova nota da materia: ");
+            scanf("%f", &temp.nota);
+            printf("Digite o novo peso da materia: ");
+            scanf("%d", &temp.peso);
+            printf("Digite o novo semestre da materia: ");
+            scanf("%d", &temp.semestre);
+
+            fprintf(dados, "%s %.2f %d %d\n", temp.nome, temp.nota, temp.peso, temp.semestre);
+        } else {
+            fprintf(dados, "%s %.2f %d %d\n", materia[i].nome, materia[i].nota, materia[i].peso, materia[i].semestre);
+        }
+        i++;
+    }
+    
+    if (indicador == 0) {
+        printf("Materia nao encontrada\n");
+        getchar();
+        pause();
+    }
+}
+
+void listarMaterias(MATERIAS *materia) {
+    int i = 0;
+
+    clear();
+
+    while (*materia[i].nome != '\0') {
+        printf("Nome: %s\n", materia[i].nome);
+        printf("Nota: %.2f\n", materia[i].nota);
+        printf("Peso: %d\n", materia[i].peso);
+        printf("Semestre: %d\n", materia[i].semestre);
+        printf("\n");
+        i++;
+    }
+
+    getchar();
+    pause();
+}
+
 void excluirMaterias(FILE *dados) {}
 void adicionarNota(FILE *dados) {}
 void alterarNota(FILE *dados) {}
 void calcularRendimentoGlobal(FILE *dados) {}
 void calcularRendimentoSemestre(FILE *dados) {}
+
+void clear() {
+    #ifdef _WIN32
+        system("cls");
+    #else
+        system("clear");
+    #endif
+}
+
+void pause() {
+    printf("Pressione qualquer tecla para continuar...");
+    getchar();
+}
