@@ -12,11 +12,11 @@ A tool for students and educators to calculate academic performance using grades
 ## Installation
 1. Clone the repository:
    ```bash
-   git clone https://github.com/wescleyj/academic-performance-calculator-UNDER-DEVELOPMENT.git
+   git clone https://github.com/wescleyj/academic-performance-calculator.git
    ```
 2. Navigate to the project directory:
    ```bash
-   cd academic-performance-calculator-UNDER-DEVELOPMENT
+   cd academic-performance-calculator
    ```
 3. Compile the program:
    ```bash
@@ -33,7 +33,4 @@ A tool for students and educators to calculate academic performance using grades
 
 ## License
 Licensed under the MIT License. See `LICENSE` for details.
-
-## Contact
-For support, contact [your email] or open an issue on GitHub.
 
